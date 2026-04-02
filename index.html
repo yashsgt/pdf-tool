@@ -3,12 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>MergeFlow | Free PDF Merge, Split & Compress Tool</title>
-
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
-<meta name="theme-color" content="#111827">
+<title>MergeFlow — PDF Toolkit</title>
 
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -18,21 +13,24 @@
 
 :root{
 --primary:#111827;
---secondary:#6b7280;
+--muted:#6b7280;
 --border:#e5e7eb;
+--danger:#ef4444;
+--danger-bg:#fee2e2;
 }
 
 body{
 margin:0;
-font-family:Inter,system-ui,sans-serif;
-background:linear-gradient(to bottom,#f8fafc,#eef2ff);
+font-family:system-ui, sans-serif;
+background:#f8fafc;
+color:#111827;
 }
 
 /* NAVBAR */
 
 .navbar{
 height:64px;
-background:white;
+background:#fff;
 border-bottom:1px solid var(--border);
 display:flex;
 align-items:center;
@@ -47,15 +45,15 @@ font-size:18px;
 
 .nav-links{
 display:flex;
-gap:28px;
+gap:26px;
 }
 
 .nav-links button{
 border:none;
 background:none;
 cursor:pointer;
-color:var(--secondary);
 font-weight:500;
+color:var(--muted);
 }
 
 .nav-links button.active{
@@ -66,20 +64,24 @@ color:var(--primary);
 
 .hero{
 text-align:center;
-margin-top:40px;
+margin-top:42px;
 }
 
 .hero h1{
 font-size:38px;
-margin-bottom:10px;
+margin-bottom:6px;
 }
 
-/* CARD */
+.hero p{
+color:var(--muted);
+}
+
+/* MAIN CARD */
 
 .container{
 display:flex;
 justify-content:center;
-margin-top:30px;
+margin-top:28px;
 }
 
 .card{
@@ -90,34 +92,24 @@ width:1000px;
 box-shadow:0 20px 60px rgba(0,0,0,.06);
 }
 
-/* TITLE */
-
 .title{
 font-size:24px;
 font-weight:600;
 }
 
-.subtitle{
-color:var(--secondary);
-margin-top:5px;
-}
-
-/* BACK BUTTON */
-
 .back-btn{
 border:none;
 background:#f3f4f6;
-padding:6px 10px;
+padding:6px 12px;
 border-radius:8px;
 cursor:pointer;
-font-size:16px;
 }
 
-/* UPLOAD */
+/* DROP ZONE */
 
 .upload-area{
 margin-top:20px;
-padding:26px;
+padding:28px;
 border:2px dashed var(--border);
 border-radius:14px;
 text-align:center;
@@ -125,7 +117,7 @@ cursor:pointer;
 background:#fafafa;
 }
 
-/* MERGE GRID */
+/* GRID */
 
 .merge-grid{
 display:grid;
@@ -141,38 +133,31 @@ position:relative;
 background:#f9fafb;
 border-radius:12px;
 padding:10px;
-text-align:center;
-cursor:grab;
+cursor:pointer;
+transition:.2s ease;
 }
 
 .merge-card canvas{
 width:100%;
 border-radius:6px;
-margin-bottom:6px;
+}
+
+.merge-card.selected{
+background:var(--danger-bg);
+border:2px solid var(--danger);
+transform:scale(1.05);
 }
 
 .merge-remove{
-background:#ef4444;
+background:var(--danger);
 border:none;
 color:white;
 font-size:11px;
 padding:3px 8px;
 border-radius:6px;
+margin-top:6px;
 cursor:pointer;
 }
-
-.merge-badge{
-position:absolute;
-top:6px;
-left:6px;
-background:#111827;
-color:white;
-font-size:11px;
-padding:2px 6px;
-border-radius:20px;
-}
-
-/* PREVIEW BOX */
 
 .preview-box{
 margin-top:20px;
@@ -180,16 +165,13 @@ padding:14px;
 border:1px solid var(--border);
 border-radius:12px;
 display:flex;
-align-items:center;
-gap:16px;
+gap:14px;
 background:#fafafa;
 }
 
 .preview-box canvas{
 width:70px;
 }
-
-/* BUTTON */
 
 .action-btn{
 margin-top:25px;
@@ -201,25 +183,26 @@ color:white;
 cursor:pointer;
 }
 
-/* STATUS */
-
-.progress{
-margin-top:12px;
-font-size:13px;
-color:var(--secondary);
-}
-
 .hidden{
 display:none;
 }
 
-input{
+input[type=file]{
 display:none;
 }
 
+/* FOOTER */
+
 .footer{
-margin-top:35px;
+margin-top:40px;
 text-align:center;
+font-size:13px;
+color:#6b7280;
+line-height:1.8;
+}
+
+.footer-credit{
+margin-top:4px;
 font-size:12px;
 color:#9ca3af;
 }
@@ -236,11 +219,13 @@ color:#9ca3af;
 <button id="mergeTab" class="active" onclick="showTool('merge')">Merge</button>
 <button id="splitTab" onclick="showTool('split')">Split</button>
 <button id="compressTab" onclick="showTool('compress')">Compress</button>
+<button id="deleteTab" onclick="showTool('delete')">Delete Pages</button>
 </div>
 </div>
 
 <div class="hero">
 <h1>All-in-one PDF toolkit</h1>
+<p>Fast, private and fully offline PDF processing in your browser</p>
 </div>
 
 <div class="container">
@@ -250,12 +235,10 @@ color:#9ca3af;
 
 <div id="mergeTool">
 
-<div style="display:flex;align-items:center;gap:12px;">
-<button class="back-btn" onclick="clearMergeFiles()">←</button>
+<div style="display:flex;gap:12px;">
+<button class="back-btn" onclick="clearMerge()">Reset</button>
 <div class="title">Merge PDFs</div>
 </div>
-
-<div class="subtitle">Arrange files visually before downloading</div>
 
 <div class="upload-area" onclick="mergeInput.click()">
 Drop PDFs here or click to browse
@@ -265,18 +248,17 @@ Drop PDFs here or click to browse
 
 <div id="mergeGrid" class="merge-grid"></div>
 
-<button class="action-btn" onclick="mergePDFs()">Merge and download</button>
-
-<div id="mergeStatus" class="progress"></div>
+<button class="action-btn" onclick="mergePDF()">Merge and download</button>
 
 </div>
+
 
 <!-- SPLIT -->
 
 <div id="splitTool" class="hidden">
 
-<div style="display:flex;align-items:center;gap:12px;">
-<button class="back-btn" onclick="clearSplitFile()">←</button>
+<div style="display:flex;gap:12px;">
+<button class="back-btn" onclick="clearSplit()">Reset</button>
 <div class="title">Split PDF</div>
 </div>
 
@@ -291,16 +273,15 @@ Drop PDFs here or click to browse
 
 <button class="action-btn" onclick="splitPDF()">Split and download ZIP</button>
 
-<div id="splitStatus" class="progress"></div>
-
 </div>
+
 
 <!-- COMPRESS -->
 
 <div id="compressTool" class="hidden">
 
-<div style="display:flex;align-items:center;gap:12px;">
-<button class="back-btn" onclick="clearCompressFile()">←</button>
+<div style="display:flex;gap:12px;">
+<button class="back-btn" onclick="clearCompress()">Reset</button>
 <div class="title">Compress PDF</div>
 </div>
 
@@ -315,12 +296,36 @@ Drop PDFs here or click to browse
 
 <button class="action-btn" onclick="compressPDF()">Compress and download</button>
 
-<div id="compressStatus" class="progress"></div>
+</div>
+
+
+<!-- DELETE PAGES -->
+
+<div id="deleteTool" class="hidden">
+
+<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+<button class="back-btn" onclick="clearDelete()">Reset</button>
+<div class="title">Delete Pages</div>
+
+<input id="deletePagesInput"
+placeholder="Example: 2,5,7-12"
+style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;width:240px;">
+</div>
+
+<div class="upload-area" onclick="deleteInput.click()">Upload PDF</div>
+
+<input id="deleteInput" type="file">
+
+<div id="deletePreviewGrid" class="merge-grid"></div>
+
+<button class="action-btn" onclick="deletePages()">Delete selected pages</button>
 
 </div>
 
+
 <div class="footer">
-Files never leave your device
+<div>Files never leave your device • Built with privacy-first design</div>
+<div class="footer-credit">© Yash Singh</div>
 </div>
 
 </div>
@@ -331,129 +336,75 @@ Files never leave your device
 /* TOOL SWITCH */
 
 function showTool(tool){
-
 mergeTool.classList.toggle("hidden",tool!=="merge")
 splitTool.classList.toggle("hidden",tool!=="split")
 compressTool.classList.toggle("hidden",tool!=="compress")
+deleteTool.classList.toggle("hidden",tool!=="delete")
 
 mergeTab.classList.toggle("active",tool==="merge")
 splitTab.classList.toggle("active",tool==="split")
 compressTab.classList.toggle("active",tool==="compress")
-
+deleteTab.classList.toggle("active",tool==="delete")
 }
 
-/* PREVIEW RENDERER */
+/* PREVIEW */
 
-async function renderPreview(file,canvas){
-
+async function preview(file,canvas){
 const pdf=await pdfjsLib.getDocument(await file.arrayBuffer()).promise
 const page=await pdf.getPage(1)
-
-const viewport=page.getViewport({scale:.6})
-
-canvas.width=viewport.width
-canvas.height=viewport.height
-
-await page.render({
-canvasContext:canvas.getContext("2d"),
-viewport
-}).promise
-
+const vp=page.getViewport({scale:.6})
+canvas.width=vp.width
+canvas.height=vp.height
+await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise
 return pdf.numPages
-
 }
 
-/* MERGE GRID */
+/* MERGE */
 
-const mergeGrid=document.getElementById("mergeGrid")
 let mergeFiles=[]
-let draggedCard=null
 
-mergeInput.onchange=()=>{
-
-for(const file of mergeInput.files){
-
+mergeInput.onchange=e=>{
+[...e.target.files].forEach(file=>{
 mergeFiles.push(file)
 createMergeCard(file)
-
-}
-
-updateMergeBadges()
-
+})
 }
 
 function createMergeCard(file){
 
 const card=document.createElement("div")
 card.className="merge-card"
-card.draggable=true
-
-const badge=document.createElement("div")
-badge.className="merge-badge"
-card.appendChild(badge)
 
 const canvas=document.createElement("canvas")
-renderPreview(file,canvas)
-
-const name=document.createElement("div")
-name.innerText=file.name
-name.style.fontSize="11px"
+preview(file,canvas)
 
 const remove=document.createElement("button")
 remove.className="merge-remove"
 remove.innerText="Remove"
 
 remove.onclick=()=>{
-mergeGrid.removeChild(card)
 mergeFiles.splice([...mergeGrid.children].indexOf(card),1)
-updateMergeBadges()
+card.remove()
 }
 
-card.appendChild(canvas)
-card.appendChild(name)
-card.appendChild(remove)
-
-card.addEventListener("dragstart",()=>draggedCard=card)
-
-card.addEventListener("dragover",e=>e.preventDefault())
-
-card.addEventListener("drop",()=>{
-
-if(draggedCard===card)return
-
-const cards=[...mergeGrid.children]
-
-const draggedIndex=cards.indexOf(draggedCard)
-const targetIndex=cards.indexOf(card)
-
-if(draggedIndex<targetIndex)
-mergeGrid.insertBefore(draggedCard,card.nextSibling)
-else
-mergeGrid.insertBefore(draggedCard,card)
-
-updateMergeBadges()
-
-})
-
-mergeGrid.appendChild(card)
-
+card.append(canvas,remove)
+mergeGrid.append(card)
 }
 
-function updateMergeBadges(){
-
-[...mergeGrid.children].forEach((card,i)=>{
-card.querySelector(".merge-badge").innerText=i+1
-})
-
-}
-
-function clearMergeFiles(){
-
+function clearMerge(){
 mergeFiles=[]
 mergeGrid.innerHTML=""
 mergeInput.value=""
-mergeStatus.innerText=""
+}
 
+async function mergePDF(){
+const out=await PDFLib.PDFDocument.create()
+for(const f of mergeFiles){
+const pdf=await PDFLib.PDFDocument.load(await f.arrayBuffer())
+const pages=await out.copyPages(pdf,pdf.getPageIndices())
+pages.forEach(p=>out.addPage(p))
+}
+download(await out.save(),"merged.pdf")
 }
 
 /* SPLIT */
@@ -461,50 +412,27 @@ mergeStatus.innerText=""
 let splitFile=null
 
 splitInput.onchange=async()=>{
-
 splitFile=splitInput.files[0]
-
-const canvas=document.getElementById("splitCanvas")
-
-const pages=await renderPreview(splitFile,canvas)
-
-splitMeta.innerHTML=`<b>${splitFile.name}</b><br>${pages} pages`
-
+const pages=await preview(splitFile,splitCanvas)
+splitMeta.innerHTML="<b>"+splitFile.name+"</b><br>"+pages+" pages"
 splitPreview.classList.remove("hidden")
-
-}
-
-function clearSplitFile(){
-
-splitFile=null
-splitPreview.classList.add("hidden")
-splitMeta.innerHTML=""
-splitCanvas.getContext("2d").clearRect(0,0,splitCanvas.width,splitCanvas.height)
-splitInput.value=""
-splitStatus.innerText=""
-
 }
 
 async function splitPDF(){
-
 const pdf=await PDFLib.PDFDocument.load(await splitFile.arrayBuffer())
-
 const zip=new JSZip()
-
 for(let i=0;i<pdf.getPageCount();i++){
-
-const doc=await PDFLib.PDFDocument.create()
-
-const [page]=await doc.copyPages(pdf,[i])
-
-doc.addPage(page)
-
-zip.file(`page-${i+1}.pdf`,await doc.save())
-
+const d=await PDFLib.PDFDocument.create()
+const[p]=await d.copyPages(pdf,[i])
+d.addPage(p)
+zip.file(`page-${i+1}.pdf`,await d.save())
+}
+download(await zip.generateAsync({type:"blob"}),"split.zip")
 }
 
-download(await zip.generateAsync({type:"blob"}),"split-pages.zip")
-
+function clearSplit(){
+splitPreview.classList.add("hidden")
+splitInput.value=""
 }
 
 /* COMPRESS */
@@ -512,51 +440,122 @@ download(await zip.generateAsync({type:"blob"}),"split-pages.zip")
 let compressFile=null
 
 compressInput.onchange=async()=>{
-
 compressFile=compressInput.files[0]
-
-const canvas=document.getElementById("compressCanvas")
-
-const pages=await renderPreview(compressFile,canvas)
-
-compressMeta.innerHTML=`<b>${compressFile.name}</b><br>${pages} pages`
-
+const pages=await preview(compressFile,compressCanvas)
+compressMeta.innerHTML="<b>"+compressFile.name+"</b><br>"+pages+" pages"
 compressPreview.classList.remove("hidden")
-
-}
-
-function clearCompressFile(){
-
-compressFile=null
-compressPreview.classList.add("hidden")
-compressMeta.innerHTML=""
-compressCanvas.getContext("2d").clearRect(0,0,compressCanvas.width,compressCanvas.height)
-compressInput.value=""
-compressStatus.innerText=""
-
 }
 
 async function compressPDF(){
-
 const pdf=await PDFLib.PDFDocument.load(await compressFile.arrayBuffer())
-
 download(await pdf.save({useObjectStreams:true}),"compressed.pdf")
+}
 
+function clearCompress(){
+compressPreview.classList.add("hidden")
+compressInput.value=""
+}
+
+/* DELETE */
+
+let deleteFile=null
+let selectedPages=new Set()
+
+deleteInput.onchange=async()=>{
+deleteFile=deleteInput.files[0]
+selectedPages.clear()
+deletePreviewGrid.innerHTML=""
+
+const pdf=await pdfjsLib.getDocument(await deleteFile.arrayBuffer()).promise
+
+for(let i=1;i<=pdf.numPages;i++){
+const page=await pdf.getPage(i)
+const vp=page.getViewport({scale:.4})
+
+const canvas=document.createElement("canvas")
+canvas.width=vp.width
+canvas.height=vp.height
+
+await page.render({
+canvasContext:canvas.getContext("2d"),
+viewport:vp
+}).promise
+
+const card=document.createElement("div")
+card.className="merge-card"
+card.append(canvas)
+
+card.onclick=()=>{
+if(selectedPages.has(i)){
+selectedPages.delete(i)
+card.classList.remove("selected")
+}else{
+selectedPages.add(i)
+card.classList.add("selected")
+}
+deletePagesInput.value=[...selectedPages].join(",")
+}
+
+deletePreviewGrid.append(card)
+}
+}
+
+/* INPUT RANGE SUPPORT */
+
+deletePagesInput.addEventListener("input",()=>{
+
+selectedPages.clear()
+
+const parts=deletePagesInput.value.split(",")
+
+parts.forEach(p=>{
+
+if(p.includes("-")){
+let[a,b]=p.split("-").map(Number)
+for(let i=a;i<=b;i++) selectedPages.add(i)
+}else{
+selectedPages.add(Number(p))
+}
+
+})
+
+document.querySelectorAll("#deletePreviewGrid .merge-card")
+.forEach((card,index)=>{
+card.classList.toggle("selected",selectedPages.has(index+1))
+})
+
+})
+
+async function deletePages(){
+
+const pdf=await PDFLib.PDFDocument.load(await deleteFile.arrayBuffer())
+const out=await PDFLib.PDFDocument.create()
+
+for(let i=0;i<pdf.getPageCount();i++){
+if(!selectedPages.has(i+1)){
+const[p]=await out.copyPages(pdf,[i])
+out.addPage(p)
+}
+}
+
+download(await out.save(),"pages-removed.pdf")
+}
+
+function clearDelete(){
+deletePreviewGrid.innerHTML=""
+deletePagesInput.value=""
+deleteInput.value=""
+selectedPages.clear()
 }
 
 /* DOWNLOAD */
 
 function download(data,name){
-
 const blob=new Blob([data])
-
 const link=document.createElement("a")
-
 link.href=URL.createObjectURL(blob)
-
 link.download=name
 link.click()
-
 }
 
 </script>
